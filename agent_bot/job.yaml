@@ -1,0 +1,29 @@
+- defaultTab: nodes
+  description: "Install Application"
+  executionEnabled: true
+  id: install-app-job
+  loglevel: INFO
+  name: Install Application
+  nodeFilterEditable: false
+  scheduleEnabled: true
+  sequence:
+    keepgoing: false
+    strategy: node-first
+    commands:
+      - description: Install application
+        exec: |
+          powershell.exe -ExecutionPolicy Bypass -Command "
+          $app = '${option.app}';
+          if ($app -eq 'chrome97') {
+              Invoke-WebRequest https://dl.google.com/chrome/install/97/chrome_installer.exe -OutFile C:\chrome_installer.exe;
+              Start-Process C:\chrome_installer.exe -ArgumentList '/silent /install' -Wait;
+          } elseif ($app -eq 'notepadplusplus') {
+              Invoke-WebRequest https://github.com/notepad-plus-plus/npp/releases/download/v8.6/npp.8.6.Installer.exe -OutFile C:\npp_installer.exe;
+              Start-Process C:\npp_installer.exe -ArgumentList '/S' -Wait;
+          } else {
+              Write-Output 'Unknown app: ' + $app
+          }"
+  options:
+    - name: app
+      required: true
+      description: "App identifier (chrome97, notepadplusplus, etc.)"
