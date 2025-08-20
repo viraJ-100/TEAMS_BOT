@@ -47,10 +47,10 @@ async def start_installation(user_id, app, version, turn_context):
         try:
             response = requests.post(
                 f"{MCP_SERVICENOW_URL}/update",
-                params={"ticket_sys_id": ticket_sys_id, "status": "completed"}
+                params={"ticket_sys_id": ticket_sys_id, "status": "resolved"}
             )
             response.raise_for_status()
-            await turn_context.send_activity("✅ ServiceNow ticket updated to 'completed'.")
+            await turn_context.send_activity("✅ ServiceNow ticket updated to 'resolved'.")
         except Exception as e:
             await turn_context.send_activity(f"⚠️ Failed to update ServiceNow ticket: {e}")
             return

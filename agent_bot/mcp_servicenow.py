@@ -23,9 +23,30 @@ def create_ticket(app_name: str, version: str, user_id: str):
     )
     return response.json()
 
+
 @app.post("/mcp/servicenow/update")
 def update_ticket(ticket_sys_id: str, status: str):
-    payload = {"work_notes": f"Status updated to {status}"}
+    state_map = {
+        "new": 1,
+        "in_progress": 2,
+        "on_hold": 3,
+        "resolved": 6,
+        "closed": 7
+    }
+
+    incident_state = state_map.get(status.lower(), 2)
+
+    payload = {
+        "work_notes": f"Status updated to {status}",
+        "incident_state": incident_state
+    }
+
+    # Add required fields if moving to resolved
+    if incident_state == 6:  # Resolved
+        payload["close_code"] = "Resolved by request"
+        payload["close_notes"] = "Automatically resolved by bot workflow"
+        payload["caller_id"] = "guest"   # <- set a valid caller sys_id or username in your SNOW instance
+
     response = requests.patch(
         f"{SNOW_INCIDENT_URL}/{ticket_sys_id}",
         auth=HTTPBasicAuth(SERVICENOW_USERNAME, SERVICENOW_PASSWORD),
