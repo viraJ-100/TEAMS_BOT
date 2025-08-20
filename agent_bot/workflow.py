@@ -11,10 +11,10 @@ MCP_SERVICENOW_URL = "http://localhost:8000/mcp/servicenow"  # adjust if FastAPI
 
 async def start_installation(user_id, app, version, turn_context):
     try:
-    # Step 1: Insert into DB
+    # Step 2: Insert into DB
         installation_id = insert_installation(user_id, app, version)
 
-        # Step 2: Create ServiceNow ticket via MCP
+        # Create ServiceNow ticket via MCP
         try:
             response = requests.post(
                 f"{MCP_SERVICENOW_URL}/create",
@@ -29,8 +29,17 @@ async def start_installation(user_id, app, version, turn_context):
         except Exception as e:
             await turn_context.send_activity(f"⚠️ Failed to create ServiceNow ticket: {e}")
             return
+        
+    # Step 3: SUPERVISOR APPROVAL
 
-        # Step 3: Simulate wait (e.g., real installation time or Rundeck job later)
+    # Step 4: SQL AND ServiceNow(pending)
+
+    # Step 5: Notify user
+
+    # Step 6: USER APPROVAL
+
+
+    # Step 7: Simulate wait (e.g., real installation time or Rundeck job later)
         await turn_context.send_activity("⚙️ Installation in progress...")
         # 3. Run Rundeck Job instead of sleep
         rundeck_response = requests.post(
@@ -43,7 +52,7 @@ async def start_installation(user_id, app, version, turn_context):
             await turn_context.send_activity(f"❌ Rundeck job failed: {rundeck_response.text}")
 
 
-        # Step 4: Update ServiceNow ticket
+    # Step 8: Update ServiceNow ticket(resolved) SQL(end_time)
         try:
             response = requests.post(
                 f"{MCP_SERVICENOW_URL}/update",
@@ -55,11 +64,13 @@ async def start_installation(user_id, app, version, turn_context):
             await turn_context.send_activity(f"⚠️ Failed to update ServiceNow ticket: {e}")
             return
 
-        # Step 5: Update DB end_time
+        # Update DB end_time
         update_end_time(installation_id)
 
-        # Step 6: Reply to user
+        # Reply to user
         await turn_context.send_activity(f"🎉 Installation of {app} {version} completed successfully!")
 
     except Exception as e:
         return f"❌ Workflow failed: {str(e)}"
+    
+    # Step 9: Feedback from user
