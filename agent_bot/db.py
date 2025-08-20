@@ -25,6 +25,25 @@ def insert_installation(user_id, app, version):
     db.close()
     return last_id   # return the row id so we can track it
 
+def update_ticket_id(installation_id, ticket_id):
+    db = get_connection()
+    cursor = db.cursor()
+    sql = "UPDATE installations SET ticket_id = %s WHERE id = %s"
+    cursor.execute(sql, (ticket_id, installation_id))
+    db.commit()
+    cursor.close()
+    db.close()
+
+
+def update_approval_req(installation_id, approval_status):
+    db = get_connection()
+    cursor = db.cursor()
+    sql = "UPDATE installations SET approval_req = %s WHERE id = %s"
+    cursor.execute(sql, (approval_status, installation_id))
+    db.commit()
+    cursor.close()
+    db.close()
+
 
 
 def update_end_time(installation_id):

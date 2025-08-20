@@ -1,7 +1,7 @@
 # workflow.py
 import asyncio
 import requests
-from db import insert_installation, update_end_time
+from db import insert_installation, update_end_time, update_ticket_id,update_approval_req
 from config import DefaultConfig
 
 CONFIG = DefaultConfig()
@@ -23,16 +23,21 @@ async def start_installation(user_id, app, version, turn_context):
             response.raise_for_status()
             ticket = response.json()
             ticket_sys_id = ticket.get("result", {}).get("sys_id", "UNKNOWN")
+            ticket_number = ticket.get("result", {}).get("number") 
 
             await turn_context.send_activity(f"📋 ServiceNow ticket created for {app} {version} (Sys ID: {ticket_sys_id}).")
 
         except Exception as e:
             await turn_context.send_activity(f"⚠️ Failed to create ServiceNow ticket: {e}")
             return
+        update_ticket_id(installation_id, ticket_number)
         
     # Step 3: SUPERVISOR APPROVAL
+    #default approval status
 
     # Step 4: SQL AND ServiceNow(pending)
+        update_approval_req(installation_id, "Approved")
+
 
     # Step 5: Notify user
 
