@@ -2,7 +2,7 @@
 from botbuilder.core import ActivityHandler, TurnContext
 from botbuilder.schema import ChannelAccount
 from parser import parse_install_command
-from workflow import start_installation
+from workflow import start_installation,continue_installation, pending_approvals
 from db_catalog import fetch_app_catalog
 from cards import build_catalog_activity
 
@@ -48,5 +48,11 @@ class MyBot(ActivityHandler):
             app, version = parsed
             await turn_context.send_activity(f"⏳ Starting installation of {app} {version}...")
             await start_installation(user_id, app, version, turn_context)
-        else:
-            await turn_context.send_activity(f"You said: '{user_input}', but I didn’t detect an install request.\nTry: `install chrome 97` or click a button above.")
+        # else:
+        #     await turn_context.send_activity(f"You said: '{user_input}', but I didn’t detect an install request.\nTry: `install chrome 97` or click a button above.")
+
+        # CASE 1: Handle approvals
+        if user_id in pending_approvals and user_input in ["yes", "y", "approve", "approved", "no", "n", "reject"]:
+            approved = user_input in ["yes", "y", "approve", "approved"]
+            await continue_installation(user_id,approved, turn_context)
+            return
