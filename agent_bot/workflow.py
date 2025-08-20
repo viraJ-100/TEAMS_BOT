@@ -50,14 +50,14 @@ async def start_installation(user_id, app, version, turn_context):
         await turn_context.send_activity(f"❌ Workflow failed at start: {str(e)}")
 
 
-async def continue_installation(user_id,approved: bool, turn_context):
+async def continue_installation_sup(user_id,approved: bool, turn_context):
     """Continue workflow after supervisor decision"""
     # Step 4: SQL AND ServiceNow(pending) 
     if user_id not in pending_approvals:
         await turn_context.send_activity("⚠️ No pending approval found.")
         return
 
-    data = pending_approvals.pop(user_id)  # remove from queue
+    data = pending_approvals[user_id]  # remove from queue
     
     app = data["app"]
     version = data["version"]
@@ -86,9 +86,31 @@ async def continue_installation(user_id,approved: bool, turn_context):
         return
 
     # Step 5: Notify user
-    
+    await turn_context.send_activity(
+            f"👨‍💼 Continue with installation of {app} {version}? (yes/no)"
+        )
 
     # Step 6: USER APPROVAL
+async def continue_installation_user(user_id,approved: bool, turn_context):
+    """Continue workflow after supervisor decision"""
+    # Step 4: SQL AND ServiceNow(pending) 
+    if user_id not in pending_approvals:
+        await turn_context.send_activity("⚠️ No pending approval found.")
+        return
+
+    data_user = pending_approvals.pop(user_id)  # remove from queue 
+    app = data_user["app"]
+    version = data_user["version"]
+
+    if not approved:
+        # update_approval_req(pending_approvals["installation_id"], "Rejected")
+        await turn_context.send_activity("❌ Installation request rejected by user.")
+    # Update DB end_time
+        update_end_time(data_user["installation_id"])
+        return
+    
+    await turn_context.send_activity("✅ Installation approved by user. Proceeding...")
+
 
 # Step 7: Rundeck job 
     await turn_context.send_activity("⚙️ Installation in progress...")
@@ -106,7 +128,7 @@ async def continue_installation(user_id,approved: bool, turn_context):
     try:
         response = requests.post(
             f"{MCP_SERVICENOW_URL}/update",
-            params={"ticket_sys_id": data["ticket_sys_id"], "status": "resolved"}
+            params={"ticket_sys_id": data_user["ticket_sys_id"], "status": "resolved"}
         )
         response.raise_for_status()
         await turn_context.send_activity("✅ ServiceNow ticket updated to 'resolved'.")
@@ -115,9 +137,9 @@ async def continue_installation(user_id,approved: bool, turn_context):
         return
 
     # Update DB end_time
-    update_end_time(data["installation_id"])
+    update_end_time(data_user["installation_id"])
 
-    # Reply to user
+    # Reply to userAC
     await turn_context.send_activity(f"🎉 Installation of {app} {version} completed successfully!")
 
     

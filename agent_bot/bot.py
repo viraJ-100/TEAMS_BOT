@@ -2,7 +2,7 @@
 from botbuilder.core import ActivityHandler, TurnContext
 from botbuilder.schema import ChannelAccount
 from parser import parse_install_command
-from workflow import start_installation,continue_installation, pending_approvals
+from workflow import start_installation,continue_installation_sup, continue_installation_user,pending_approvals
 from db_catalog import fetch_app_catalog
 from cards import build_catalog_activity
 
@@ -46,7 +46,12 @@ class MyBot(ActivityHandler):
         # CASE 1: Handle approvals
         if user_id in pending_approvals and user_input in ["approve","reject"]:
             approved = user_input in ["approve"]
-            await continue_installation(user_id,approved, turn_context)
+            await continue_installation_sup(user_id,approved, turn_context)
+            return
+        
+        if user_id in pending_approvals and user_input in ["yes","no"]:
+            approved = user_input in ["yes"]
+            await continue_installation_user(user_id,approved, turn_context)
             return
 
         parsed = parse_install_command(user_input)
