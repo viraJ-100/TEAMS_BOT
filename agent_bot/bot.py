@@ -42,17 +42,22 @@ class MyBot(ActivityHandler):
             else:
                 await turn_context.send_activity(build_catalog_activity(apps))
             return
-
-        parsed = parse_install_command(user_input)
-        if parsed:
-            app, version = parsed
-            await turn_context.send_activity(f"⏳ Starting installation of {app} {version}...")
-            await start_installation(user_id, app, version, turn_context)
-        # else:
-        #     await turn_context.send_activity(f"You said: '{user_input}', but I didn’t detect an install request.\nTry: `install chrome 97` or click a button above.")
-
+        
         # CASE 1: Handle approvals
         if user_id in pending_approvals and user_input in ["approve","reject"]:
             approved = user_input in ["approve"]
             await continue_installation(user_id,approved, turn_context)
             return
+
+        parsed = parse_install_command(user_input)
+        if parsed["intent"] == "install":
+            app, version = parsed["app"], parsed["version"]
+            await turn_context.send_activity(f"⏳ Starting installation of {app} {version}...")
+            await start_installation(user_id, app, version, turn_context)
+            return
+        else:
+        # General chat, not install
+            await turn_context.send_activity(parsed["answer"])
+            return 
+        
+        

@@ -1,5 +1,6 @@
 # parser.py
 import os
+import json
 from groq import Groq
 from dotenv import load_dotenv
 
@@ -10,21 +11,25 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def parse_install_command(user_input: str):
     """
-    Use Groq LLM (gemma2-9b-it) to parse user input.
-    Returns (intent, app, version) or None
+    Use Groq LLM to parse any intent.
+    Returns a dict: {intent, app, version, answer}
+    - If intent == "install": contains app + version
+    - If intent != "install": contains an answer (free-form text reply)
     """
 
     prompt = f"""
-    You are an intent parser for a software installation bot.
-    Extract the intent, app name, and version from the following text:
+    You are an intent parser + responder for a software installation bot.
+    - If the user is requesting to install software, extract app + version.
+    - If the user is asking something general (not install), generate a helpful short answer.
 
     User input: "{user_input}"
 
     Respond in strict JSON format:
     {{
-      "intent": "<intent or none>",
+      "intent": "<install | greeting | smalltalk | question | other>",
       "app": "<application name or none>",
-      "version": "<version or latest>"
+      "version": "<version or latest>",
+      "answer": "<bot's response if not install, else empty string>"
     }}
     """
 
@@ -34,15 +39,17 @@ def parse_install_command(user_input: str):
         temperature=0.0
     )
 
-    # Get LLM response text
     content = response.choices[0].message.content.strip()
 
-    import json
+    # Clean markdown fences if LLM adds them
+    if content.startswith("```"):
+        content = content.strip("`")
+        if content.startswith("json"):
+            content = content[4:].strip()
+
     try:
         data = json.loads(content)
-        if data.get("intent") == "install":
-            return data["app"].lower(), data.get("version", "latest")
+        return data
     except Exception as e:
         print("LLM parsing failed:", e, content)
-
-    return None
+        return {"intent": "other", "app": None, "version": None, "answer": "Sorry, I didn't understand that."}
