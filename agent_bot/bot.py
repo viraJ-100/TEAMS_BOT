@@ -53,6 +53,6 @@ class MyBot(ActivityHandler):
 
         # CASE 1: Handle approvals
         if user_id in pending_approvals and user_input in ["approve","reject"]:
-            approved = user_input in ["approve","reject"]
+            approved = user_input in ["approve"]
             await continue_installation(user_id,approved, turn_context)
             return
