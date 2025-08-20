@@ -38,8 +38,21 @@ async def start_installation(user_id, app, version, turn_context):
     # Step 4: SQL AND ServiceNow(pending)
         update_approval_req(installation_id, "Approved")
 
+        try:
+            response = requests.post(
+                f"{MCP_SERVICENOW_URL}/update",
+                params={"ticket_sys_id": ticket_sys_id, "status": "in_progress"}
+            )
+            response.raise_for_status()
+            await turn_context.send_activity("✅ ServiceNow ticket updated to 'resolved'.")
+        except Exception as e:
+            await turn_context.send_activity(f"⚠️ Failed to update ServiceNow ticket: {e}")
+            return
+
+
 
     # Step 5: Notify user
+    
 
     # Step 6: USER APPROVAL
 
