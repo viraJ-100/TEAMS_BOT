@@ -42,7 +42,7 @@ async def start_installation(user_id, app, version, turn_context):
         }
 
         await turn_context.send_activity(
-            f"👨‍💼 Supervisor approval required: Do you approve installation of {app} {version}? (yes/no)"
+            f"👨‍💼 Supervisor approval required: Do you approve installation of {app} {version}? (approve/reject)"
         )
         return
 
