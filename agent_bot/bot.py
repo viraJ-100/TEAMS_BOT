@@ -52,7 +52,7 @@ class MyBot(ActivityHandler):
         #     await turn_context.send_activity(f"You said: '{user_input}', but I didn’t detect an install request.\nTry: `install chrome 97` or click a button above.")
 
         # CASE 1: Handle approvals
-        if user_id in pending_approvals and user_input in ["yes", "y", "approve", "approved", "no", "n", "reject"]:
-            approved = user_input in ["yes", "y", "approve", "approved"]
+        if user_id in pending_approvals and user_input in ["approve","reject"]:
+            approved = user_input in ["approve","reject"]
             await continue_installation(user_id,approved, turn_context)
             return
