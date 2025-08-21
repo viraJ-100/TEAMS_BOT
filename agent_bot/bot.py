@@ -61,8 +61,17 @@ class MyBot(ActivityHandler):
             await start_installation(user_id, app, version, turn_context)
             return
         else:
-        # General chat, not install
-            await turn_context.send_activity(parsed["answer"])
+            # General chat, not install
+            answer = parsed["answer"]
+            if isinstance(answer, list):
+                answer = "\n".join(str(x) for x in answer)
+            elif isinstance(answer, str):
+                # Convert paragraph to bullet points if not already formatted
+                if "\n" not in answer and ". " in answer:
+                    # Split on sentences and add bullets
+                    sentences = [s.strip() for s in answer.split('. ') if s.strip()]
+                    answer = "\n".join(f"• {s.strip('.')}" for s in sentences)
+            await turn_context.send_activity(answer)
             return 
         
         
