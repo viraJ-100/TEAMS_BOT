@@ -25,7 +25,7 @@ async def start_installation(user_id, app, version, turn_context):
         ticket_number = ticket.get("result", {}).get("number")
 
         await turn_context.send_activity(
-            f"📋 ServiceNow ticket created for {app} {version} (Sys ID: {ticket_sys_id})."
+            f"📋 ServiceNow ticket created for {app} {version} (Sys ID: {ticket_number})."
         )
 
         update_ticket_id(installation_id, ticket_number)
