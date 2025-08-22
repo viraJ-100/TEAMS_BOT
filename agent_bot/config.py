@@ -31,5 +31,5 @@ SERVICENOW_PASSWORD = os.environ.get("SERVICENOW_PASSWORD", "5x$XyQYtU9!u")
 RUNDECK_URL = os.environ.get("RUNDECK_URL", "http://localhost:4440")
 RUNDECK_API_TOKEN = os.environ.get("RUNDECK_API_TOKEN", "LT0PQl8WAy1dsmzVPfWEv7qAmiQ2dji3")
 RUNDECK_PROJECT = os.environ.get("RUNDECK_PROJECT", "AppInstaller")
-RUNDECK_JOB_ID = os.environ.get("RUNDECK_JOB_ID", "b503f4fb-112d-4008-8204-8b2e633dd2b9")
+RUNDECK_JOB_ID = os.environ.get("RUNDECK_JOB_ID", "a90b55f0-e16b-4e5c-9f81-ad522c5ef228")
 

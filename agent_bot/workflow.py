@@ -114,10 +114,11 @@ async def continue_installation_user(user_id,approved: bool, turn_context):
 
 # Step 7: Rundeck job 
     await turn_context.send_activity("⚙️ Installation in progress...")
+    download_url = "https://github.com/git-for-windows/git/releases/download/v2.51.0.windows.1/Git-2.51.0-64-bit.exe"
         # 3. Run Rundeck Job instead of sleep
     rundeck_response = requests.post(
         "http://localhost:8001/mcp/rundeck/run",
-        json={"app_name": app, "version": version}
+        json={"app_name": app, "version": version, "download_url": download_url}
     )
     if rundeck_response.status_code == 200:
         await turn_context.send_activity(f"⚙️ Installation triggered on Rundeck for {app} {version}")

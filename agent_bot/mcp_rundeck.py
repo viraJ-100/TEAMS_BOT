@@ -1,12 +1,18 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 import requests
 import os
 from config import RUNDECK_URL, RUNDECK_API_TOKEN, RUNDECK_PROJECT, RUNDECK_JOB_ID
 
 app = FastAPI()
 
+class RundeckRequest(BaseModel):
+    app_name: str
+    version: str
+    download_url: str
+
 @app.post("/mcp/rundeck/run")
-def run_job(app_name: str, version: str):
+def run_job(request: RundeckRequest):
     url = f"{RUNDECK_URL}/api/45/job/{RUNDECK_JOB_ID}/run"
     headers = {
         "X-Rundeck-Auth-Token": RUNDECK_API_TOKEN,
@@ -14,8 +20,9 @@ def run_job(app_name: str, version: str):
     }
     payload = {
         "options": {
-            "app": app_name,
-            "version": version
+            "app": request.app_name,
+            "version": request.version,
+            "download_url": request.download_url
         }
     }
 
